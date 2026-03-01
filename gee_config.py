@@ -20,10 +20,10 @@ load_dotenv()
 
 # --- GEE Initialization ---
 try:
-    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-flood-risk-guajira'))
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 except Exception:
     ee.Authenticate()
-    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-flood-risk-guajira'))
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 
 # ============================================================================
 # STUDY AREA: Department of La Guajira, Colombia
@@ -31,7 +31,7 @@ except Exception:
 
 # Administrative boundaries from FAO GAUL Level 1
 ADMIN_DATASET = 'FAO/GAUL/2015/level1'
-DEPARTMENT_NAME = 'La Guajira'
+DEPARTMENT_NAME = 'Guajira'  # FAO GAUL uses 'Guajira' (without 'La')
 COUNTRY_NAME = 'Colombia'
 
 # Municipal boundaries from FAO GAUL Level 2
@@ -42,20 +42,36 @@ HYDROBASINS_L5 = 'WWF/HydroSHEDS/v1/Basins/hybas_sa_lev05_v1c'
 HYDROBASINS_L7 = 'WWF/HydroSHEDS/v1/Basins/hybas_sa_lev07_v1c'
 
 # 3 Subregions of La Guajira with their municipalities
-# Names in ASCII (no accents) as required by FAO GAUL / GEE
+# Names MUST match FAO GAUL Level 2 exactly.
+# NOTE: GAUL 2015 only has 11 of 15 municipalities for La Guajira.
+#   Missing: Albania, Dibulla, Distraccion, La Jagua del Pilar
+#   (these were created after GAUL 2015 or are grouped differently)
+#   The pipeline uses the department boundary (Level 1) for the study area
+#   and processes all pixels within it, regardless of municipal boundaries.
 SUBREGIONS = {
     'Alta Guajira': [
         'Uribia', 'Manaure'
     ],
     'Media Guajira': [
-        'Riohacha', 'Maicao', 'Dibulla'
+        'Riohacha', 'Maicao', 'Dibulla'  # Dibulla not in GAUL L2
     ],
     'Baja Guajira': [
-        'Albania', 'Barrancas', 'Distraccion', 'El Molino',
-        'Fonseca', 'Hatonuevo', 'La Jagua del Pilar',
-        'San Juan del Cesar', 'Urumita', 'Villanueva'
+        'Albania', 'Barrancas', 'Distraccion', 'El Molino',  # Albania, Distraccion not in GAUL L2
+        'Fonseca', 'Hato Nuevo', 'La Jagua del Pilar',  # La Jagua del Pilar not in GAUL L2
+        'San Juan Del Cesar', 'Urumita', 'Villanueva'
     ],
 }
+
+# Municipality name mapping: our names -> GAUL Level 2 names
+# Only includes municipalities that ARE in GAUL Level 2
+GAUL_MUNICIPALITY_NAMES = [
+    'Barrancas', 'El Molino', 'Fonseca', 'Hato Nuevo',
+    'Maicao', 'Manaure', 'Riohacha', 'San Juan Del Cesar',
+    'Uribia', 'Urumita', 'Villanueva'
+]
+
+# Municipalities NOT in GAUL Level 2 (will use department-level boundary)
+GAUL_MISSING_MUNICIPALITIES = ['Albania', 'Dibulla', 'Distraccion', 'La Jagua del Pilar']
 
 # Department statistics (for quality control validation)
 EXPECTED_AREA_KM2 = 20848
