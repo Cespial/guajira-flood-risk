@@ -366,7 +366,7 @@ def _evaluate_fold(
         "precision": float(precision_score(y_true, y_pred, zero_division=0)),
         "recall": float(recall_score(y_true, y_pred, zero_division=0)),
         "f1": float(f1_score(y_true, y_pred, zero_division=0)),
-        "auc_roc": float(roc_auc_score(y_true, y_prob)),
+        "auc_roc": float(roc_auc_score(y_true, y_prob)) if len(np.unique(y_true)) > 1 else float("nan"),
     }
 
 
@@ -560,7 +560,7 @@ def generate_susceptibility_map(
     # GEE-native Random Forest
     n_trees = cfg.ML_PARAMS["random_forest"]["n_estimators"]
     classifier = ee.Classifier.smileRandomForest(
-        numberOfTrees=min(n_trees, 200),  # GEE limit
+        numberOfTrees=min(n_trees, 500),  # GEE server-side limit
     ).setOutputMode("PROBABILITY")
 
     trained = classifier.train(
@@ -656,9 +656,12 @@ def generate_ensemble_map_gee(
     feature_stack = stack_all_features(region)
     samples = generate_training_samples(feature_stack, region)
 
+    _gee_max = 500
+    n_trees_rf = min(cfg.ML_PARAMS["random_forest"]["n_estimators"], _gee_max)
+    n_trees_gbt = min(cfg.ML_PARAMS["xgboost"]["n_estimators"], _gee_max)
     classifiers = {
-        "rf": ee.Classifier.smileRandomForest(numberOfTrees=200),
-        "gbt": ee.Classifier.smileGradientTreeBoost(numberOfTrees=200),
+        "rf": ee.Classifier.smileRandomForest(numberOfTrees=n_trees_rf),
+        "gbt": ee.Classifier.smileGradientTreeBoost(numberOfTrees=n_trees_gbt),
         "cart": ee.Classifier.smileCart(),
     }
 
@@ -722,14 +725,12 @@ def municipal_risk_stats(
     municipalities = get_municipalities()
     prob = susceptibility.select(band).clip(region)
 
-    # Risk class thresholds
-    risk_classes = {
-        "very_low": (0, 0.2),
-        "low": (0.2, 0.4),
-        "moderate": (0.4, 0.6),
-        "high": (0.6, 0.8),
-        "very_high": (0.8, 1.01),
-    }
+    # Risk class thresholds from config
+    risk_classes = dict(cfg.RISK_CLASSES)
+    # Adjust upper bound to capture prob == 1.0 (lt is strict less-than)
+    if "Very High" in risk_classes:
+        lo, _ = risk_classes["Very High"]
+        risk_classes["Very High"] = (lo, 1.01)
 
     # Create classified image
     risk_class_img = ee.Image(0).rename("risk_class")
@@ -869,7 +870,7 @@ def run_ml_pipeline(
         joblib.dump(model, model_path)
         log.info("Model saved: %s", model_path)
 
-    # --- 5. Ensemble on holdout ---
+    # --- 5. Ensemble on full data (in-sample, final models trained on all data) ---
     ensemble_prob = ensemble_prediction(models_dict, X)
     ensemble_pred = (ensemble_prob >= 0.5).astype(int)
     ensemble_metrics = _evaluate_fold(y, ensemble_pred, ensemble_prob)
@@ -906,6 +907,7 @@ def run_ml_pipeline(
             description="guajira_flood_susceptibility_ensemble",
             region=region,
             scale=cfg.EXPORT_SCALE,
+            folder=cfg.EXPORT_FOLDER,
         )
         tasks.append(task)
 
@@ -914,6 +916,7 @@ def run_ml_pipeline(
         task = export_table_to_drive(
             collection=muni_stats,
             description="guajira_municipal_risk_stats",
+            folder=cfg.EXPORT_FOLDER,
             file_format="CSV",
         )
         tasks.append(task)

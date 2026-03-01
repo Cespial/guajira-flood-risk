@@ -45,6 +45,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from gee_config import (
     SUBREGIONS, SUSCEPTIBILITY_FEATURES, HAND_CLASSES,
     FLOOD_FREQUENCY_CLASSES, ML_PARAMS,
+    GAUL_MUNICIPALITY_NAMES, SEASONS,
 )
 from utils import (
     setup_logging, ensure_dirs,
@@ -240,8 +241,8 @@ def validate_areas() -> List[QCResult]:
 
     Tests:
     - GADM department boundary area
-    - Sum of 15 municipality areas
-    - Sum of 3 subregion areas
+    - Sum of municipality areas (11 in GAUL)
+    - Sum of subregion areas
     - Individual municipality areas are positive and reasonable
 
     Returns
@@ -296,7 +297,7 @@ def validate_areas() -> List[QCResult]:
             category="area_validation",
             passed=within_tol,
             message=(
-                f"Sum of 15 municipalities: {mun_total:,.1f} km2 "
+                f"Sum of {len(municipalities)} municipalities: {mun_total:,.1f} km2 "
                 f"(diff = {diff_pct:+.2f}%)"
             ),
             severity="ERROR" if not within_tol else "INFO",
@@ -352,7 +353,7 @@ def validate_areas() -> List[QCResult]:
             category="area_validation",
             passed=within_tol,
             message=(
-                f"Sum of 3 subregions: {sub_total:,.1f} km2 "
+                f"Sum of {len(subregions)} subregions: {sub_total:,.1f} km2 "
                 f"(diff = {diff_pct:+.2f}%)"
             ),
             severity="WARNING" if not within_tol else "INFO",
@@ -633,8 +634,8 @@ def verify_municipal_stats() -> List[QCResult]:
     try:
         municipalities = load_municipalities("gadm")
         n_mun = len(municipalities)
-        expected = 15
-        within_range = abs(n_mun - expected) <= 5  # Allow small tolerance
+        expected = len(GAUL_MUNICIPALITY_NAMES)  # 11 in GAUL (4 missing)
+        within_range = abs(n_mun - expected) <= 2
         r = QCResult(
             check_name="municipal_count",
             category="municipal_stats",
@@ -679,9 +680,9 @@ def verify_municipal_stats() -> List[QCResult]:
         r = QCResult(
             check_name="subregion_count",
             category="municipal_stats",
-            passed=(n_sub == 3),
-            message=f"Subregion count: {n_sub} (expected 3)",
-            severity="ERROR" if n_sub != 3 else "INFO",
+            passed=(n_sub == len(SUBREGIONS)),
+            message=f"Subregion count: {n_sub} (expected {len(SUBREGIONS)})",
+            severity="ERROR" if n_sub != len(SUBREGIONS) else "INFO",
         )
         results.append(r)
         _add_result(r)

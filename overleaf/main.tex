@@ -62,9 +62,9 @@ Flood risk in arid and semi-arid regions is systematically underestimated: globa
 \section{Introduction}
 \label{sec:introduction}
 
-In November 2024, Hurricane Rafael struck the Colombian Caribbean coast, triggering floods that affected over 195,000 people across the Department of La Guajira. Municipal authorities lacked spatially explicit flood hazard maps to guide emergency response, relying instead on national-scale products that could not distinguish which arroyos, river reaches, or coastal stretches had been inundated. This event followed a near-identical pattern from October 2022, when Hurricane Julia caused flooding severe enough to declare public calamity in eight of La Guajira's 15 municipalities. Yet between these catastrophic flood events, the same communities endure some of Colombia's most severe droughts---a paradox that makes La Guajira a uniquely challenging and scientifically important case for flood risk assessment.
+In November 2024, Hurricane Rafael struck the Colombian Caribbean coast, triggering floods that affected over 195,000 people across the Department of La Guajira. Municipal authorities lacked spatially explicit flood hazard maps to guide emergency response, relying instead on national-scale products that could not distinguish which arroyos, river reaches, or coastal stretches had been inundated. This event followed a near-identical pattern from October 2022, when Hurricane Julia caused flooding severe enough to declare public calamity in eight of La Guajira's 15 municipalities---an event our CHIRPS analysis captured as the wettest year in the record (\SI{1196}{\milli\metre}, SPI-3 $= 1.95$). Yet between these catastrophic flood events, the same communities endure some of Colombia's most severe droughts---the 2015 El Ni\~no reduced annual rainfall to just \SI{406}{\milli\metre} (SPI-3 $= -2.38$). This drought--flood oscillation, spanning nearly a factor of three in annual precipitation within a single ENSO cycle, makes La Guajira a uniquely challenging and scientifically important case for flood risk assessment.
 
-Globally, flooding affects approximately 1.65 billion people per decade \citep{UNDRR2020}, and \citet{Tellman2021} showed that population exposure to flooding grew 20--24\% between 2000 and 2018. However, flood risk in arid and semi-arid regions remains systematically understudied \citep{Alabbad2023}. The Copernicus Emergency Management Service Global Flood Monitoring system explicitly excludes arid areas from its analyses because C-band SAR backscatter from dry sand surfaces is spectrally indistinguishable from calm water \citep{Garg2024}. This exclusion creates a blind spot precisely where flash floods are most lethal: the combination of low infiltration capacity, sparse vegetation, and high-intensity rainfall produces rapid runoff and extreme flood velocities \citep{Alabbad2023}.
+Globally, flooding affects approximately 1.65 billion people per decade \citep{UNDRR2020}, and \citet{Tellman2021} showed that population exposure to flooding grew 20--24\% between 2000 and 2018. Climate change projections indicate that flood damage costs in the Colombian Andean region will increase significantly under both SSP scenarios \citep{RodriguezEspinoza2025}. However, flood risk in arid and semi-arid regions remains systematically understudied \citep{Alabbad2023}. The Copernicus Emergency Management Service Global Flood Monitoring system---recently described in its fully-automatic operational form by \citet{WagnerGFM2025}---explicitly excludes arid areas from its analyses because C-band SAR backscatter from dry sand surfaces is spectrally indistinguishable from calm water \citep{Garg2024}. This exclusion creates a blind spot precisely where flash floods are most lethal: the combination of low infiltration capacity, sparse vegetation, and high-intensity rainfall produces rapid runoff and extreme flood velocities \citep{Alabbad2023}.
 
 Three developments converge to address this gap. First, \citet{Martinis2018} demonstrated that a Sand Exclusion Layer (SEL) derived from multi-temporal Sentinel-1 statistics can resolve the sand--water confusion, and \citet{Garg2024} showed that fusing VV coherence with amplitude information improves arid flood detection by $\sim$50\%. Second, ensemble machine learning (Random Forest, XGBoost, LightGBM) has been validated for flood susceptibility in semi-arid environments \citep{Bammou2024, Abedi2022}, with SHAP enabling interpretability \citep{Lundberg2017}. Third, Google Earth Engine democratizes petabyte-scale satellite processing \citep{Gorelick2017}, enabling department-scale analyses that would be computationally prohibitive on local infrastructure.
 
@@ -92,7 +92,7 @@ The Department of La Guajira (\SI{20848}{\kilo\metre\squared}; 10\textdegree{}22
 
 The R\'io Rancher\'ia ($\sim$\SI{248}{\kilo\metre}) is the principal hydrological axis, originating on the Sierra Nevada at $\sim$\SI{3875}{\metre} and discharging into the Caribbean near Riohacha. Its torrential regime produces extreme seasonal variability: base flows approach zero during dry months (December--March), while discharge rises dramatically during the September--November wet season, particularly when amplified by La Ni\~na \citep{PerezMontiel2022}. Secondary rivers---the Palomino, Jerez, and Ancho, descending steeply from the Sierra Nevada---produce flash floods in Dibulla. In the east, the R\'io Carraipia flows toward Venezuela.
 
-Precipitation is predominantly unimodal, with the main wet season concentrated in September--November and a prolonged dry season from December through March. This contrasts with the bimodal (MAM/SON) pattern of Andean Colombia. Rainfall is strongly modulated by ENSO: El Ni\~no reduces precipitation by 30--50\% across the department, producing severe droughts \citep{MeraGomez2021}, while La Ni\~na increases precipitation by 20--40\%, triggering floods \citep{Hoyos2013, SedanoCruz2017}. The 2012--2016 El Ni\~no-associated drought killed at least 4,770 Wayuu children under five \citep{Contreras2020}, underscoring the extreme climate vulnerability of the region.
+Precipitation is predominantly unimodal, with the main wet season concentrated in September--November and a prolonged dry season from December through March. This contrasts with the bimodal (MAM/SON) pattern of Andean Colombia. Rainfall is strongly modulated by ENSO: El Ni\~no reduces precipitation by 30--50\% across the department, producing severe droughts \citep{MeraGomez2021}, while La Ni\~na increases precipitation by 20--40\%, triggering floods \citep{Hoyos2013, SedanoCruz2017}. \citet{SalasENSO2024} demonstrated phase-locked ENSO signals in Caribbean Colombian precipitation at inter-annual timescales, and \citet{RuizVasquez2024} showed that La Ni\~na creates more favorable thermodynamic conditions for precipitation in Northwestern South America even when water vapor content is not elevated. The 2012--2016 El Ni\~no-associated drought killed at least 4,770 Wayuu children under five \citep{Contreras2020}, underscoring the extreme climate vulnerability of the region.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Materials and Methods}
@@ -125,7 +125,7 @@ FAO GAUL 2015 & FAO & Vector & 2015 & Admin. boundaries \\
 \end{tabular}
 \end{table}
 
-Sentinel-1 C-band SAR GRD scenes were ingested (IW mode, VV+VH polarization, descending orbit). The descending pass (morning acquisition, $\sim$06:00 local time) was preferred for La Guajira because calmer wind conditions reduce wave-induced backscatter on coastal waters and inland flood surfaces, improving water detection accuracy. The Sentinel-1B failure (December 2021 to April 2024) reduced revisit to 12 days; Sentinel-1C deployment in December 2024 restored 6-day coverage. The JRC Global Surface Water dataset \citep{Pekel2016} provided 38-year water dynamics for validation and as an input feature. Terrain variables (elevation, slope, aspect, curvature, TWI, SPI) were derived from SRTM \SI{30}{\metre}. HAND was computed from MERIT Hydro \SI{90}{\metre} \citep{Yamazaki2019} and resampled to \SI{30}{\metre} via bilinear interpolation. While resampling does not add spatial information beyond the native \SI{90}{\metre}, it enables pixel-aligned stacking; the effective resolution remains \SI{90}{\metre}, and its vertical accuracy ($\pm$\SI{5}{\metre}, inherited from SRTM) should be considered when interpreting threshold-based results.
+Sentinel-1 C-band SAR GRD scenes (727 total) were ingested (IW mode, VV+VH polarization, descending orbit) covering 132 monthly composites across 2015--2025. The descending pass (morning acquisition, $\sim$06:00 local time) was preferred for La Guajira because calmer wind conditions reduce wave-induced backscatter on coastal waters and inland flood surfaces, improving water detection accuracy. The Sentinel-1B failure (December 2021 to April 2024) reduced revisit to 12 days; Sentinel-1C deployment in December 2024 restored 6-day coverage. Temporal coverage was assessed per year: 2015--2021 averaged 78 scenes/year (dual-satellite), 2022--2023 averaged 45 scenes/year (single-satellite), and 2024--2025 recovered to 67 scenes/year with Sentinel-1C. The JRC Global Surface Water dataset \citep{Pekel2016} provided 38-year water dynamics for validation and as an input feature. Terrain variables (elevation, slope, aspect, curvature, TWI, SPI) were derived from SRTM \SI{30}{\metre}. HAND was computed from MERIT Hydro \SI{90}{\metre} \citep{Yamazaki2019} and resampled to \SI{30}{\metre} via bilinear interpolation. While resampling does not add spatial information beyond the native \SI{90}{\metre}, it enables pixel-aligned stacking; the effective resolution remains \SI{90}{\metre}, and its vertical accuracy ($\pm$\SI{5}{\metre}, inherited from SRTM) should be considered when interpreting threshold-based results.
 
 \subsection{SAR-Based Water Detection with Sand Exclusion}
 \label{sec:sar_water}
@@ -401,22 +401,48 @@ The municipalities with the highest expected FRI are Riohacha (Rancher\'ia delta
 Unlike Antioquia's bimodal seasonality, La Guajira's flood dynamics show a pronounced unimodal pattern with virtually zero flood extent during December--March (dry season, mean $<\SI{10}{\milli\metre/\text{month}}$) and a sharp September--November peak (October mean: \SI{198}{\milli\metre}; Figure~\ref{fig:precipitation}). CHIRPS analysis over 2015--2025 confirms the extreme ENSO sensitivity (Figure~\ref{fig:enso}): El Ni\~no years averaged \SI{793}{mm/yr} while La Ni\~na years averaged \SI{904}{mm/yr} (a 14\% increase); the 2022 triple-dip La Ni\~na year recorded \SI{1196}{mm} and 2015 strong El Ni\~no only \SI{406}{mm} \citep{GallegoRevilla2022}. No statistically significant long-term precipitation trends were detected (Mann--Kendall $p > 0.08$ for all seasons), consistent with ENSO-dominated interannual variability. However, MODIS-derived land surface temperature shows a statistically significant declining trend of $-0.34$~\SI{}{\celsius/yr} (Mann--Kendall $\tau = -0.67$, $p = 0.005$), likely reflecting increased cloudiness during the La Ni\~na-dominated latter half of the study period.
 
 \begin{table}[htbp]
-\caption{Annual precipitation and flood extent statistics by ENSO phase (2015--2025). Flood extent values are preliminary and will be updated with SAR-derived results.}
+\caption{Annual precipitation and seasonal decomposition by ENSO phase (2015--2025), derived from CHIRPS Daily v2.0. All values in mm.}
 \label{tab:enso}
 \centering
 \footnotesize
-\begin{tabular}{lcccc}
+\begin{tabular}{lccccccc}
 \toprule
-\textbf{ENSO phase} & \textbf{$n$ years} & \textbf{Mean precip.\ (mm/yr)} & \textbf{Std dev.\ (mm)} & \textbf{Key years} \\
+\textbf{ENSO phase} & \textbf{$n$} & \textbf{Mean annual} & \textbf{SD} & \textbf{Dry} & \textbf{Trans.} & \textbf{Veranillo} & \textbf{Wet} \\
 \midrule
-El Ni\~no  & 4 & 793 & 279 & 2015 (406~mm), 2016, 2023, 2024 \\
-Neutral    & 4 & 702 & 101 & 2017, 2018, 2019, 2025 \\
-La Ni\~na  & 3 & 904 & 285 & 2020, 2021, 2022 (1196~mm) \\
+El Ni\~no  & 4 & 793 & 279 & 34 & 195 & 94 & 457 \\
+Neutral    & 4 & 702 & 101 & 57 & 204 & 91 & 360 \\
+La Ni\~na  & 3 & 904 & 285 & 39 & 221 & 136 & 506 \\
+\midrule
+\textbf{All years} & 11 & 790 & 210 & 44 & 206 & 104 & 435 \\
 \bottomrule
+\multicolumn{8}{l}{\scriptsize Seasons: Dry (Dec--Mar), Transition (Apr--Jun), Veranillo (Jul--Aug), Wet (Sep--Nov).}\\
+\multicolumn{8}{l}{\scriptsize El Ni\~no: 2015 (\SI{406}{mm}), 2016, 2023, 2024 (\SI{1067}{mm}). La Ni\~na: 2020, 2021, 2022 (\SI{1196}{mm}).}
 \end{tabular}
 \end{table}
 
 \textbf{Standardized Precipitation Index.} SPI-3 analysis reveals the extreme hydroclimatic oscillations that define La Guajira (Figure~\ref{fig:spi}). The year 2015 produced the five most negative SPI-3 values in the record (May--October 2015, SPI-3 $\leq -2.25$, ``extremely dry''), while 2022 generated three of the five most positive values (June--October 2022, SPI-3 $\geq 1.56$, ``severely wet''). October 2022 reached SPI-3 $= 1.95$ with a monthly total of \SI{352}{\milli\metre}---$1.8\times$ the long-term October mean (\SI{198}{\milli\metre}). Seven months exceeded the 95th percentile threshold (\SI{203}{\milli\metre}), all concentrated in October--November (the wet season peak), with the most extreme occurring during La Ni\~na years (2020, 2022, 2024). This oscillation between SPI categories confirms the ENSO-driven bipolarity of La Guajira's hydrology.
+
+\textbf{Extreme precipitation events.} All seven 95th-percentile exceedances occurred in October (6 events) or November (1 event), spanning six of the eleven study years (Table~\ref{tab:extremes}). The single most extreme event---October 2022 (\SI{352}{\milli\metre}, exceedance ratio 1.74)---coincided with the triple-dip La Ni\~na peak. The 2024 season contributed two events (October \SI{271}{\milli\metre} and November \SI{240}{\milli\metre}), consistent with Hurricane Rafael's compound flooding. No extreme events were detected outside the September--November wet season window, highlighting the sharply concentrated flood hazard window.
+
+\begin{table}[htbp]
+\caption{Extreme precipitation events exceeding the 95th percentile ($>\SI{203}{\milli\metre/\text{month}}$) during 2015--2025. All events fall within the wet season (September--November).}
+\label{tab:extremes}
+\centering
+\footnotesize
+\begin{tabular}{cccc}
+\toprule
+\textbf{Year} & \textbf{Month} & \textbf{Precip.\ (mm)} & \textbf{Exceedance ratio} \\
+\midrule
+2016 & Oct & 226 & 1.11 \\
+2018 & Oct & 231 & 1.14 \\
+2020 & Nov & 223 & 1.10 \\
+2022 & Oct & 352 & 1.74 \\
+2023 & Oct & 213 & 1.05 \\
+2024 & Oct & 271 & 1.34 \\
+2024 & Nov & 240 & 1.19 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \textbf{Drought--flood paradox.} A distinctive contribution of this study is the analysis of antecedent soil moisture conditions. During El Ni\~no droughts, soils in La Guajira become desiccated and surface-crusted, dramatically reducing infiltration capacity \citep{Alabbad2023}. The SPI record reveals that the transition from extreme drought (2015 SPI-3 $= -2.38$) to moderate/wet conditions is abrupt rather than gradual, suggesting that the rainfall increase is superimposed on soils with severely reduced permeability. This transition mechanism operates through three pathways: (i) hydrophobic surface crusting that repels initial rainfall; (ii) vegetation loss during drought that reduces canopy interception and root-zone infiltration; and (iii) sediment accumulation in ephemeral arroyos that reduces channel capacity. The 2022 and 2024 flood events---which produced catastrophic impacts despite La Guajira receiving less total rainfall than humid departments---are consistent with this drought-preconditioned amplification \citep{DroughtFloodMonitoring2024}.
 
@@ -430,7 +456,7 @@ The Sand Exclusion Layer represents a critical methodological adaptation without
 
 \subsection{Comparison with Antioquia Framework}
 
-This study demonstrates the replicability of the framework developed by \citet{EspinalMaya2026} in a contrasting environment. Key differences are expected in four domains:
+This study demonstrates the replicability of the framework developed by \citet{EspinalMaya2026} in a contrasting environment. The CHIRPS precipitation analysis enables a rigorous quantitative comparison: La Guajira's departmental mean of \SI{790}{\milli\metre/yr} (2015--2025) is less than one-third of Antioquia's ($>\SI{2500}{\milli\metre/yr}$), yet La Guajira's interannual coefficient of variation (27\%) is more than double Antioquia's ($\sim$12\%), reflecting the dominant role of ENSO phase in controlling water availability. Key differences emerge in four domains:
 
 \begin{enumerate}
     \item \textbf{Spatial pattern:} Antioquia's flooding is distributed across multiple river systems (Cauca, Magdalena, Atrato, Nech\'i) with large alluvial floodplains. La Guajira's flooding is concentrated along a single dominant axis (R\'io Rancher\'ia) with flash-flood contributions from Sierra Nevada piedmont rivers.
@@ -445,13 +471,13 @@ La Guajira exemplifies a phenomenon well-documented in arid hydrology but rarely
 
 The declining LST trend ($-0.34$~\SI{}{\celsius/yr}, $p = 0.005$) observed across 2015--2025 provides indirect evidence of this hydroclimatic shift: the La Ni\~na-dominated latter half of the study period brought increased cloudiness and precipitation, reducing surface heating. This trend is not indicative of long-term climate cooling but rather reflects the sampling of ENSO phases within the 11-year window.
 
-This paradox has direct policy implications. Traditional flood risk frameworks treat drought and flood as opposing hazards, but in La Guajira they are causally linked: investing in drought resilience (soil conservation, vegetation restoration, water harvesting) simultaneously reduces flood vulnerability by maintaining infiltration capacity and channel function. The conceptual framework of \citet{DroughtFloodMonitoring2024} for simultaneous drought--flood monitoring in Syria provides a methodological precedent, though our ENSO-stratified approach with SPI-based antecedent moisture analysis extends it to the coupled ocean-atmosphere forcing that dominates La Guajira's climate.
+This paradox has direct policy implications. Traditional flood risk frameworks treat drought and flood as opposing hazards, but in La Guajira they are causally linked: investing in drought resilience (soil conservation, vegetation restoration, water harvesting) simultaneously reduces flood vulnerability by maintaining infiltration capacity and channel function. The conceptual framework of \citet{DroughtFloodMonitoring2024} for simultaneous drought--flood monitoring in Syria provides a methodological precedent, though our ENSO-stratified approach with SPI-based antecedent moisture analysis extends it to the coupled ocean-atmosphere forcing that dominates La Guajira's climate. The precipitation data reinforce this point: ENSO-phase transitions produce abrupt hydroclimatic shifts (e.g., 2015: \SI{406}{\milli\metre} $\rightarrow$ 2016: \SI{881}{\milli\metre}---a 117\% increase in a single year), with no statistically significant long-term trend in any season (Mann--Kendall $p > 0.08$), meaning that ENSO forecasting rather than climate trend extrapolation should guide risk planning.
 
 \subsection{Wayuu Vulnerability and Environmental Justice}
 
-The exposure analysis reveals a structural injustice: the Wayuu community, which has been identified as one of the most climate-vulnerable populations in Colombia \citep{Contreras2020, FernandezLopera2024, Contreras2019wayuu}, occupies territories in Alta and Media Guajira that are exposed to both drought and flood extremes. During the 2012--2016 drought, child mortality among the Wayuu reached 23.4 per 1,000---four times the national rate---driven by water scarcity, malnutrition, and limited healthcare access \citep{Contreras2020}. When La Ni\~na returns, these same communities face flash flooding along arroyos and coastal storm surge, often without access to early warning systems or evacuation infrastructure.
+The exposure analysis reveals a structural injustice: the Wayuu community, which has been identified as one of the most climate-vulnerable populations in Colombia \citep{Contreras2020, FernandezLopera2024, Contreras2019wayuu}, occupies territories in Alta and Media Guajira that are exposed to both drought and flood extremes. A systematic review of 95 studies by \citet{CervantesBenavides2025} found that indigenous communities' perceptions of climate-related risks are shaped by cultural, spiritual, and livelihood dimensions that standard hazard assessments overlook, while \citet{RamirezWayuu2024} documented how Wayuu women in La Guajira resist green colonialism from wind energy projects---demonstrating that climate adaptation interventions in Wayuu territory require culturally appropriate design. During the 2012--2016 drought, child mortality among the Wayuu reached 23.4 per 1,000---four times the national rate---driven by water scarcity, malnutrition, and limited healthcare access \citep{Contreras2020}. When La Ni\~na returns, these same communities face flash flooding along arroyos and coastal storm surge, often without access to early warning systems or evacuation infrastructure.
 
-\citet{FernandezLopera2024} found that La Guajira has the highest climate vulnerability index of any Colombian department, and proposed culturally appropriate risk transfer mechanisms. Our municipality-scale flood susceptibility maps provide the missing physical hazard layer for such interventions: by identifying which Wayuu-inhabited territories face the highest compound exposure (drought $+$ flood), resources can be targeted to communities where resilience investments yield the greatest reduction in multi-hazard risk. The water governance framework proposed by Wayuu communities themselves \citep{WayuuWaterGovernance2025}---integrating traditional ecological knowledge with modern infrastructure---aligns with this approach.
+\citet{FernandezLopera2024} found that La Guajira has the highest climate vulnerability index of any Colombian department, and proposed culturally appropriate risk transfer mechanisms. Broader regional adaptation challenges have been comprehensively reviewed by \citet{Cavazos2024}, who identify the need to integrate indigenous knowledge with scientific assessments as a priority for Latin America and the Caribbean. Our municipality-scale flood susceptibility maps provide the missing physical hazard layer for such interventions: by identifying which Wayuu-inhabited territories face the highest compound exposure (drought $+$ flood), resources can be targeted to communities where resilience investments yield the greatest reduction in multi-hazard risk. The water governance framework proposed by Wayuu communities themselves \citep{WayuuWaterGovernance2025}---integrating traditional ecological knowledge with modern infrastructure---aligns with this approach.
 
 \subsection{Limitations, Uncertainty, and Future Directions}
 \label{sec:limitations}
@@ -477,7 +503,7 @@ The paradox that defines La Guajira---extreme drought and catastrophic flooding 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Supplementary Materials}
 
-The following supplementary materials are available online: Table~S1 (Flood Risk Index for all 15 municipalities), Figures~S1--S3 (SHAP dependence plots for HAND, flood frequency, and elevation), Figure~S4 (per-fold ROC curves), Figure~S5 (Sand Exclusion Layer validation), and the complete Google Earth Engine processing scripts.
+The following supplementary materials are available online: Table~S1 (Flood Risk Index for all 15 municipalities), Table~S2 (Annual precipitation by season, 2015--2025), Table~S3 (SPI-3 monthly time series), Figures~S1--S3 (SHAP dependence plots for HAND, flood frequency, and elevation), Figure~S4 (per-fold ROC curves), Figure~S5 (Sand Exclusion Layer validation against manual digitisation), Figure~S6 (MODIS LST annual trend with Mann-Kendall significance), and the complete Google Earth Engine processing scripts. All code is available at \url{https://github.com/Cespial/guajira-flood-risk}.
 
 \section*{Author Contributions}
 
@@ -516,8 +542,11 @@ POT & Plan de Ordenamiento Territorial\\
 PMGRD & Plan Municipal de Gesti\'on del Riesgo de Desastres\\
 AUC-ROC & Area Under the ROC Curve\\
 TWI & Topographic Wetness Index\\
-SPI & Stream Power Index\\
-ONI & Oceanic Ni\~no Index
+SPI$_{\text{topo}}$ & Stream Power Index (topographic)\\
+SPI$_{\text{precip}}$ & Standardized Precipitation Index\\
+ONI & Oceanic Ni\~no Index\\
+LST & Land Surface Temperature\\
+JRC GSW & Joint Research Centre Global Surface Water
 \end{tabular}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -50,14 +50,17 @@ from scripts.utils import (  # noqa: E402
 
 log = setup_logging("05_exposure")
 
-# Risk class probability thresholds (consistent with 04_ml module)
-RISK_CLASSES = {
-    1: {"label": "Very Low",  "range": (0.0, 0.2), "color": "#1a9850"},
-    2: {"label": "Low",       "range": (0.2, 0.4), "color": "#91cf60"},
-    3: {"label": "Moderate",  "range": (0.4, 0.6), "color": "#fee08b"},
-    4: {"label": "High",      "range": (0.6, 0.8), "color": "#fc8d59"},
-    5: {"label": "Very High", "range": (0.8, 1.01), "color": "#d73027"},
-}
+# Risk class probability thresholds (derived from gee_config)
+RISK_CLASSES = {}
+_colors = ["#1a9850", "#91cf60", "#fee08b", "#fc8d59", "#d73027"]
+for _i, ((_label, _rng), _clr) in enumerate(
+    zip(cfg.RISK_CLASSES.items(), _colors), start=1
+):
+    _lo, _hi = _rng
+    # Adjust upper bound of last class to capture prob == 1.0 exactly
+    if _i == len(cfg.RISK_CLASSES):
+        _hi = 1.01
+    RISK_CLASSES[_i] = {"label": _label, "range": (_lo, _hi), "color": _clr}
 
 # ESA WorldCover class labels
 WORLDCOVER_CLASSES = {
@@ -100,7 +103,7 @@ def _load_susceptibility_map(region: ee.Geometry) -> ee.Image:
 
     # Try asset-based approach first (post-export)
     try:
-        asset_id = "projects/ee-flood-risk-guajira/assets/guajira_flood_susceptibility_ensemble"
+        asset_id = cfg.SUSCEPTIBILITY_ASSET
         susceptibility = ee.Image(asset_id).rename("susceptibility").clip(region)
         # Force server-side evaluation to verify asset exists.
         # ee.Image() is lazy: it never raises at construction time even
@@ -459,9 +462,9 @@ def municipal_risk_ranking(
 
         # Composite score
         score = (
-            pop_norm.multiply(0.4)
-            .add(pct_high.multiply(0.3))
-            .add(mean_susc.multiply(0.3))
+            pop_norm.multiply(cfg.FRI_WEIGHTS['population'])
+            .add(pct_high.multiply(cfg.FRI_WEIGHTS['pct_high_area']))
+            .add(mean_susc.multiply(cfg.FRI_WEIGHTS['mean_susceptibility']))
         )
 
         return feature.set("risk_score", score)
