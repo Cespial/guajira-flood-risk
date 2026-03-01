@@ -6,7 +6,7 @@ Cristian Espinal Maya [![ORCID](https://img.shields.io/badge/ORCID-0009--0000--1
 
 School of Applied Sciences and Engineering, Universidad EAFIT, Medellin, Colombia
 
-[![License: MIT](https://img.shields.io/badge/Code-MIT-yellow)](LICENSE) · [![License: CC BY 4.0](https://img.shields.io/badge/Manuscript-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/)
+[![GitHub](https://img.shields.io/badge/GitHub-Cespial%2Fguajira--flood--risk-blue)](https://github.com/Cespial/guajira-flood-risk) · [![License: MIT](https://img.shields.io/badge/Code-MIT-yellow)](LICENSE) · [![License: CC BY 4.0](https://img.shields.io/badge/Manuscript-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/)
 
 ---
 
