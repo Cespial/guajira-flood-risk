@@ -293,6 +293,9 @@ def create_guajira_subregions() -> None:
     gpd = import_geopandas()
 
     # Mapping: subregion name -> list of GADM NAME_2 values
+    # Note: GADM uses 'Hatonuevo' and 'San Juan del Cesar' (different from
+    # GAUL's 'Hato Nuevo' / 'San Juan Del Cesar' used in gee_config.py).
+    # This dict uses GADM spellings for local shapefile matching.
     SUBREGIONS = {
         'Alta Guajira': ['Uribia', 'Manaure'],
         'Media Guajira': ['Riohacha', 'Maicao', 'Dibulla'],

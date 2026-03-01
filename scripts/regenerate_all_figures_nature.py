@@ -42,7 +42,11 @@ import requests
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from gee_config import HAND_CLASSES, SUSCEPTIBILITY_FEATURES
+from gee_config import (
+    HAND_CLASSES, SUSCEPTIBILITY_FEATURES, ADMIN_DATASET, DEPARTMENT_NAME,
+    COUNTRY_NAME, S1_COLLECTION, JRC_GSW, MERIT_HYDRO, ENSO_YEARS,
+    RISK_CLASSES, MAP_CENTER,
+)
 
 FIGURES_DIR = PROJECT_ROOT / "outputs" / "figures"
 OVERLEAF_FIGURES = PROJECT_ROOT / "overleaf" / "figures"
@@ -54,12 +58,13 @@ CRS_COLOMBIA = "EPSG:3116"
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 OVERLEAF_FIGURES.mkdir(parents=True, exist_ok=True)
 
+import os
 import ee
 try:
-    ee.Initialize(project='ee-flood-risk-guajira')
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 except Exception:
     ee.Authenticate()
-    ee.Initialize(project='ee-flood-risk-guajira')
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
@@ -156,9 +161,9 @@ COL_ORANGE = '#f28e2b'
 
 def get_guajira_region():
     return (
-        ee.FeatureCollection('FAO/GAUL/2015/level1')
-        .filter(ee.Filter.eq('ADM0_NAME', 'Colombia'))
-        .filter(ee.Filter.eq('ADM1_NAME', 'La Guajira'))
+        ee.FeatureCollection(ADMIN_DATASET)
+        .filter(ee.Filter.eq('ADM0_NAME', COUNTRY_NAME))
+        .filter(ee.Filter.eq('ADM1_NAME', DEPARTMENT_NAME))
     ).geometry().dissolve()
 
 
@@ -199,7 +204,7 @@ def load_subregions():
 # Map helpers — professional cartographic elements
 # ============================================================================
 
-def add_scalebar(ax, lat=7.0, length_km=50, y_frac=0.04, x_frac=0.05):
+def add_scalebar(ax, lat=11.35, length_km=50, y_frac=0.04, x_frac=0.05):
     km_per_deg = 111.32 * math.cos(math.radians(lat))
     deg_len = length_km / km_per_deg
     xl, xr = ax.get_xlim()
@@ -346,7 +351,7 @@ def fig02_sar_water_detection():
     bbox = [-73.40, 10.80, -72.20, 11.80]
     guajira = load_boundary()
 
-    s1 = (ee.ImageCollection('COPERNICUS/S1_GRD')
+    s1 = (ee.ImageCollection(S1_COLLECTION)
           .filter(ee.Filter.eq('instrumentMode', 'IW'))
           .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
           .filterBounds(flood_region).select('VV'))
@@ -400,7 +405,7 @@ def fig03_jrc_water_occurrence():
     bbox = get_bbox(region)
     gdf = load_boundary()
 
-    jrc = ee.Image('JRC/GSW1_4/GlobalSurfaceWater').select('occurrence')
+    jrc = ee.Image(JRC_GSW).select('occurrence')
     vis = {'min': 0, 'max': 100,
            'palette': ['f7fbff', 'd0d9e6', '9faec2', '6282a3', '2b5c8a', '08306b']}
 
@@ -443,7 +448,7 @@ def fig05_hand_map():
     bbox = get_bbox(region)
     gdf = load_boundary()
 
-    hand = ee.Image('MERIT/Hydro/v1_0_1').select('hnd')
+    hand = ee.Image(MERIT_HYDRO).select('hnd')
     vis = {'min': 0, 'max': 60,
            'palette': ['a50026', 'd73027', 'f46d43', 'fdae61', 'fee08b',
                         'd9ef8b', 'a6d96a', '66bd63', '1a9850', '006837']}
@@ -608,7 +613,7 @@ def fig08_susceptibility_map():
     gdf = load_boundary()
     sub = load_subregions()
 
-    hand = ee.Image('MERIT/Hydro/v1_0_1').select('hnd')
+    hand = ee.Image(MERIT_HYDRO).select('hnd')
     vis = {'min': 0, 'max': 60,
            'palette': ['a50026', 'd73027', 'f46d43', 'fdae61',
                         'fee08b', 'd9ef8b', 'a6d96a', '66bd63', '1a9850', '006837']}
@@ -668,9 +673,9 @@ def fig11_seasonal_dynamics():
         for year in range(2015, 2026):
             for month in range(1, 13):
                 sf = (0.8 * np.exp(-0.5 * ((month - 10.0) / 1.5) ** 2) + 0.15)
-                if year in [2016, 2019, 2023]:
+                if year in ENSO_YEARS.get('El Nino', []):
                     sf *= 0.75
-                elif year in [2017, 2020, 2021, 2022]:
+                elif year in ENSO_YEARS.get('La Nina', []):
                     sf *= 1.25
                 area = sf * 300 + np.random.normal(0, 20)
                 records.append({'year': year, 'month': month,
@@ -690,8 +695,8 @@ def fig11_seasonal_dynamics():
     ax.plot(monthly['date'], monthly['flood_area_km2'], color=COL_BLUE, linewidth=0.5)
 
     # ENSO shading with labels
-    enso_nino = [2016, 2019, 2023]
-    enso_nina = [2017, 2020, 2021, 2022]
+    enso_nino = ENSO_YEARS.get('El Nino', [])
+    enso_nina = ENSO_YEARS.get('La Nina', [])
     for y in enso_nino:
         ax.axvspan(pd.Timestamp(y, 1, 1), pd.Timestamp(y, 12, 31),
                    alpha=0.06, color=COL_RED)

@@ -26,7 +26,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.patheffects as pe
-from matplotlib.colors import BoundaryNorm, ListedColormap
 from PIL import Image
 import requests
 
@@ -34,7 +33,10 @@ import requests
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from gee_config import HAND_CLASSES
+from gee_config import (
+    HAND_CLASSES, ADMIN_DATASET, DEPARTMENT_NAME, COUNTRY_NAME,
+    S1_COLLECTION, JRC_GSW, MERIT_HYDRO, MAP_CENTER,
+)
 
 # Import local utils (the root-level one, not scripts/utils.py)
 from utils import (
@@ -45,12 +47,13 @@ from utils import (
     CRS_WGS84,
 )
 
+import os
 import ee
 try:
-    ee.Initialize(project='ee-flood-risk-guajira')
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 except Exception:
     ee.Authenticate()
-    ee.Initialize(project='ee-flood-risk-guajira')
+    ee.Initialize(project=os.getenv('GEE_PROJECT_ID', 'ee-maestria-tesis'))
 
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
@@ -58,9 +61,9 @@ warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 def get_guajira_region():
     """Get La Guajira geometry from FAO GAUL in GEE."""
     guajira = (
-        ee.FeatureCollection('FAO/GAUL/2015/level1')
-        .filter(ee.Filter.eq('ADM0_NAME', 'Colombia'))
-        .filter(ee.Filter.eq('ADM1_NAME', 'La Guajira'))
+        ee.FeatureCollection(ADMIN_DATASET)
+        .filter(ee.Filter.eq('ADM0_NAME', COUNTRY_NAME))
+        .filter(ee.Filter.eq('ADM1_NAME', DEPARTMENT_NAME))
     )
     return guajira.geometry().dissolve()
 
@@ -121,7 +124,7 @@ def add_north_arrow(ax, x=0.95, y=0.95, size=15):
     )
 
 
-def add_scalebar_wgs84(ax, lat_center=7.0, length_km=50):
+def add_scalebar_wgs84(ax, lat_center=11.35, length_km=50):
     """
     Add a manual scale bar on a WGS84 map.
     At this latitude, 1 degree longitude ~ 111 * cos(lat) km.
@@ -165,7 +168,7 @@ def fig02_sar_water_detection():
     flood_bbox = [-73.40, 10.80, -72.20, 11.80]
 
     s1 = (
-        ee.ImageCollection('COPERNICUS/S1_GRD')
+        ee.ImageCollection(S1_COLLECTION)
         .filter(ee.Filter.eq('instrumentMode', 'IW'))
         .filter(ee.Filter.listContains('transmitterReceiverPolarisation', 'VV'))
         .filterBounds(flood_region)
@@ -242,7 +245,7 @@ def fig03_jrc_water_occurrence():
     guajira_gdf = load_guajira_boundary("gadm")  # WGS84
 
     # DON'T mask — include all occurrence values so low-frequency areas are visible
-    jrc = ee.Image('JRC/GSW1_4/GlobalSurfaceWater').select('occurrence')
+    jrc = ee.Image(JRC_GSW).select('occurrence')
 
     vis_params = {
         'min': 0, 'max': 100,
@@ -286,7 +289,7 @@ def fig03_jrc_water_occurrence():
 
     ax.set_title("JRC Global Surface Water Occurrence, La Guajira", fontsize=10)
     add_north_arrow(ax)
-    add_scalebar_wgs84(ax, lat_center=7.0, length_km=50)
+    add_scalebar_wgs84(ax, lat_center=11.35, length_km=50)
     ax.set_axis_off()
 
     fig.tight_layout()
@@ -308,7 +311,7 @@ def fig05_hand_map():
     bbox = get_guajira_bbox(region)
     guajira_gdf = load_guajira_boundary("gadm")  # WGS84
 
-    hand = ee.Image('MERIT/Hydro/v1_0_1').select('hnd')
+    hand = ee.Image(MERIT_HYDRO).select('hnd')
 
     # Continuous HAND visualization (not classified to avoid selfMask issues)
     # Use continuous palette from red (low=susceptible) to green (high=safe)
@@ -351,7 +354,7 @@ def fig05_hand_map():
 
     ax.set_title("HAND Flood Susceptibility, La Guajira", fontsize=10)
     add_north_arrow(ax)
-    add_scalebar_wgs84(ax, lat_center=7.0, length_km=50)
+    add_scalebar_wgs84(ax, lat_center=11.35, length_km=50)
     ax.set_axis_off()
 
     fig.tight_layout()
@@ -379,7 +382,7 @@ def fig08_susceptibility_map():
     # Primary proxy: inverted HAND (low HAND = high susceptibility)
     # HAND is the single best predictor of flood susceptibility
     # Invert so 0m HAND → susceptibility=1.0, ≥60m → susceptibility=0.0
-    hand = ee.Image('MERIT/Hydro/v1_0_1').select('hnd')
+    hand = ee.Image(MERIT_HYDRO).select('hnd')
 
     # Visualize directly as inverted HAND (high values = red = susceptible)
     # Using max=60 so that HAND 0→dark red, HAND 60→dark green
@@ -420,7 +423,7 @@ def fig08_susceptibility_map():
 
     ax.set_title("Flood Susceptibility (Ensemble Model)", fontsize=10)
     add_north_arrow(ax)
-    add_scalebar_wgs84(ax, lat_center=7.0, length_km=50)
+    add_scalebar_wgs84(ax, lat_center=11.35, length_km=50)
     ax.set_axis_off()
 
     fig.tight_layout()

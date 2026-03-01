@@ -124,8 +124,6 @@ def load_guajira_boundary(source: str = "gadm") -> gpd.GeoDataFrame:
     gdf = gpd.read_file(path)
     return gdf
 
-# Backwards compatibility alias
-load_antioquia_boundary = load_guajira_boundary
 
 
 def load_municipalities(source: str = "gadm") -> gpd.GeoDataFrame:

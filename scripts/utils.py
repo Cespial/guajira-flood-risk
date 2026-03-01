@@ -426,7 +426,7 @@ def export_to_drive(
     description: str,
     region: ee.Geometry,
     scale: int = cfg.EXPORT_SCALE,
-    folder: str = "guajira_flood_risk",
+    folder: str = cfg.EXPORT_FOLDER,
     crs: str = "EPSG:4326",
     max_pixels: int = 1e13,
 ) -> ee.batch.Task:
@@ -480,7 +480,7 @@ def export_to_drive(
 def export_table_to_drive(
     collection: ee.FeatureCollection,
     description: str,
-    folder: str = "guajira_flood_risk",
+    folder: str = cfg.EXPORT_FOLDER,
     file_format: str = "CSV",
 ) -> ee.batch.Task:
     """
