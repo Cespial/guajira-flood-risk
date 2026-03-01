@@ -847,7 +847,7 @@ def _plot_enso_comparison(combined_df: pd.DataFrame) -> None:
 def main() -> None:
     """Execute the full climate analysis pipeline."""
     logger.info("=" * 70)
-    logger.info("CLIMATE ANALYSIS FOR FLOOD CONTEXT - ANTIOQUIA, COLOMBIA")
+    logger.info("CLIMATE ANALYSIS FOR FLOOD CONTEXT - LA GUAJIRA, COLOMBIA")
     logger.info("=" * 70)
 
     ensure_dirs()

@@ -6,8 +6,8 @@ Downloads and processes geographic boundary data for the La Guajira Flood Risk
 Research Project.
 
 This script downloads from authoritative public sources:
-  - Administrative boundaries (department + 125 municipalities)
-  - 9 official subregions of La Guajira
+  - Administrative boundaries (department + 15 municipalities)
+  - 3 official subregions of La Guajira
   - River basins / cuencas (HydroBASINS levels 5 and 7)
   - Natural Earth department-level context
   - Notes on additional data sources requiring manual access
@@ -141,7 +141,7 @@ def extract_guajira_gadm() -> None:
     """
     Extract La Guajira-specific GeoJSON files from GADM Colombia data:
       - Department boundary (level 1)
-      - All 125 municipalities (level 2)
+      - All 15 municipalities (level 2)
     """
     gpd = import_geopandas()
     print("\n[2] Extracting La Guajira boundaries from GADM data")
@@ -161,9 +161,9 @@ def extract_guajira_gadm() -> None:
         else:
             print("  WARNING: La Guajira not found in GADM L1 data")
 
-    # -- La Guajira 125 municipalities --
+    # -- La Guajira 15 municipalities --
     l2_path = BOUNDARIES_DIR / "gadm41_COL_2.json"
-    muns_out = BOUNDARIES_DIR / "guajira_municipalities_125_GADM41.geojson"
+    muns_out = BOUNDARIES_DIR / "guajira_municipalities_15_GADM41.geojson"
     if not muns_out.exists() and l2_path.exists():
         with open(l2_path) as fh:
             data = json.load(fh)
@@ -274,71 +274,32 @@ def download_natural_earth() -> None:
 
 def create_guajira_subregions() -> None:
     """
-    Build the 9 official subregions of La Guajira by dissolving GADM
+    Build the 3 official subregions of La Guajira by dissolving GADM
     municipality polygons. Subregion classification follows Gobernacion
     de La Guajira / DANE official groupings.
     """
-    print("\n[5] Creating La Guajira 9 Subregion Boundaries")
+    print("\n[5] Creating La Guajira 3 Subregion Boundaries")
 
-    out_path = BOUNDARIES_DIR / "guajira_9_subregions.geojson"
+    out_path = BOUNDARIES_DIR / "guajira_3_subregions.geojson"
     if out_path.exists():
         print(f"  -> Already exists: {out_path.name}")
         return
 
-    muns_path = BOUNDARIES_DIR / "guajira_municipalities_125_GADM41.geojson"
+    muns_path = BOUNDARIES_DIR / "guajira_municipalities_15_GADM41.geojson"
     if not muns_path.exists():
         print("  WARNING: GADM municipalities file not found. Run extract_guajira_gadm() first.")
         return
 
     gpd = import_geopandas()
 
-    # GADM uses concatenated names without spaces (e.g., "LaEstrella")
     # Mapping: subregion name -> list of GADM NAME_2 values
     SUBREGIONS = {
-        "Valle de Aburrá": [
-            "Barbosa", "Girardota", "Copacabana", "Bello", "Medellín",
-            "Itagüí", "Envigado", "Sabaneta", "LaEstrella", "Caldas",
-        ],
-        "Oriente": [
-            "Abejorral", "Alejandría", "Argelia", "ElCarmendeViboral", "Cocorná",
-            "Concepción", "Peñol", "Retiro", "Santuario", "Granada",
-            "Guarné", "Guatapé", "LaCeja", "LaUnión", "Marinilla",
-            "Nariño", "Rionegro", "SanCarlos", "SanFrancisco",
-            "SanLuís", "SanRafael", "SanVicente", "Sonsón",
-        ],
-        "Suroeste": [
-            "Amagá", "Andes", "Angelópolis", "Betania", "Betulia",
-            "Caicedo", "Caramanta", "CiudadBolívar", "Concordia", "Fredonia",
-            "Hispania", "Jardín", "Jericó", "LaPintada", "Montebello",
-            "Pueblorrico", "Salgar", "SantaBárbara", "Támesis", "Tarso",
-            "Titiribí", "Urrao", "Valparaíso", "Venecia",
-        ],
-        "Norte": [
-            "Angostura", "Belmira", "Briceño", "Campamento", "CarolinadelPrincipe",
-            "DonMatías", "Entrerríos", "GómezPlata", "Guadalupe", "Ituango",
-            "SanAndrésdeCuerquia", "SanJosédelaMontaña", "SanPedrodelosMilagros",
-            "SantaRosadeOsos", "Toledo", "Valdivia", "Yarumal",
-        ],
-        "Nordeste": [
-            "Amalfi", "Anorí", "Cisneros", "Remedios", "SanRoque",
-            "SantoDomingo", "Segovia", "Vegachí", "Yalí", "Yolombó",
-        ],
-        "Occidente": [
-            "Abriaquí", "Anzá", "Armenia", "Buriticá", "Cañasgordas",
-            "Dabeiba", "Ebéjico", "Frontino", "Giraldo", "Heliconia",
-            "Liborina", "Olaya", "Pequé", "Sabanalarga", "SanJerónimo",
-            "SantafédeLa Guajira", "ElSopetrán", "Uramita",
-        ],
-        "Magdalena Medio": [
-            "Caracolí", "Maceo", "PuertoBerrío", "PuertoNare", "PuertoTriunfo", "Yondó",
-        ],
-        "Bajo Cauca": [
-            "Cáceres", "Caucasia", "ElBagre", "Nechí", "Tarazá", "Zaragoza",
-        ],
-        "Urabá": [
-            "Apartadó", "Arboletes", "Carepa", "Chigorodó", "Murindó",
-            "Mutatá", "Necoclí", "SanJuandeUrabá", "SanPedrodeUrabá",
-            "Turbo", "VigíadelFuerte",
+        'Alta Guajira': ['Uribia', 'Manaure'],
+        'Media Guajira': ['Riohacha', 'Maicao', 'Dibulla'],
+        'Baja Guajira': [
+            'Albania', 'Barrancas', 'Distraccion', 'El Molino',
+            'Fonseca', 'Hatonuevo', 'La Jagua del Pilar',
+            'San Juan del Cesar', 'Urumita', 'Villanueva'
         ],
     }
 
@@ -377,7 +338,7 @@ def create_guajira_subregions() -> None:
         json.dump(fc, fh, ensure_ascii=False)
 
     total = sum(f["properties"]["n_municipalities_matched"] for f in features)
-    print(f"  -> Saved {out_path.name} (9 subregions, {total} municipalities matched)")
+    print(f"  -> Saved {out_path.name} (3 subregions, {total} municipalities matched)")
 
 
 # ---------------------------------------------------------------------------

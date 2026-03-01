@@ -423,7 +423,7 @@ def generate_table5_municipal_risk() -> pd.DataFrame:
             name_col = "NAME_2" if "NAME_2" in muns.columns else muns.columns[0]
             all_names = muns[name_col].tolist()
         except Exception:
-            all_names = [f"Municipality_{i}" for i in range(1, 126)]
+            all_names = [f"Municipality_{i}" for i in range(1, 16)]
 
         np.random.seed(42)
         n = min(20, len(all_names))
@@ -461,7 +461,7 @@ def generate_table5_municipal_risk() -> pd.DataFrame:
 def generate_table6_population_exposure() -> pd.DataFrame:
     """
     Table 6: Population exposure to flood risk aggregated by the
-    9 official subregions of La Guajira.
+    3 official subregions of La Guajira.
     """
     logger.info("Generating Table 6: Population exposure by subregion...")
 
@@ -538,7 +538,7 @@ def generate_table6_population_exposure() -> pd.DataFrame:
 def generate_table7_seasonal_dynamics() -> pd.DataFrame:
     """
     Table 7: Statistics of flood extent by season and month,
-    showing the bimodal precipitation/flood pattern in La Guajira.
+    showing the unimodal precipitation/flood pattern in La Guajira.
     """
     logger.info("Generating Table 7: Seasonal flood dynamics...")
 
@@ -553,8 +553,7 @@ def generate_table7_seasonal_dynamics() -> pd.DataFrame:
         for year in range(2015, 2026):
             for month in range(1, 13):
                 seasonal_factor = (
-                    0.5 * np.exp(-0.5 * ((month - 4.5) / 1.2) ** 2)
-                    + 0.7 * np.exp(-0.5 * ((month - 10.5) / 1.2) ** 2)
+                    0.8 * np.exp(-0.5 * ((month - 10.0) / 1.5) ** 2)
                     + 0.15
                 )
                 area = seasonal_factor * 300 + np.random.normal(0, 30)
@@ -628,7 +627,7 @@ def generate_table7_seasonal_dynamics() -> pd.DataFrame:
 def main() -> None:
     """Generate all 7 publication tables."""
     logger.info("=" * 70)
-    logger.info("TABLE GENERATION - ANTIOQUIA FLOOD RISK ASSESSMENT")
+    logger.info("TABLE GENERATION - LA GUAJIRA FLOOD RISK ASSESSMENT")
     logger.info("=" * 70)
 
     ensure_dirs()

@@ -145,7 +145,7 @@ def get_municipalities() -> ee.FeatureCollection:
     Returns
     -------
     ee.FeatureCollection
-        ~125 municipality polygons with properties including ``ADM2_NAME``.
+        ~15 municipality polygons with properties including ``ADM2_NAME``.
     """
     municipalities = (
         ee.FeatureCollection(cfg.MUNICIPAL_DATASET)
@@ -163,8 +163,8 @@ def get_subregion_municipalities(subregion_name: str) -> ee.FeatureCollection:
     Parameters
     ----------
     subregion_name : str
-        One of the 9 official La Guajira subregions defined in
-        ``gee_config.SUBREGIONS`` (e.g. ``'Valle de Aburra'``).
+        One of the 3 official La Guajira subregions defined in
+        ``gee_config.SUBREGIONS`` (e.g. ``'Alta Guajira'``).
 
     Returns
     -------
@@ -613,9 +613,9 @@ def _self_test() -> None:
     _log.info("Municipality count: %s", n_munis)
 
     # Subregion filter
-    va = get_subregion_municipalities("Valle de Aburra")
-    n_va = safe_getinfo(va.size(), label="valle_aburra.size()")
-    _log.info("Valle de Aburra municipalities: %s", n_va)
+    ag = get_subregion_municipalities("Alta Guajira")
+    n_ag = safe_getinfo(ag.size(), label="alta_guajira.size()")
+    _log.info("Alta Guajira municipalities: %s", n_ag)
 
     # DEM
     dem = get_dem()

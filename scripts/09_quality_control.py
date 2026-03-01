@@ -6,7 +6,7 @@ Quality control and validation for the La Guajira Flood Risk Assessment.
 
 Checks:
   1. All expected outputs exist and are non-empty
-  2. Area calculations (La Guajira total ~ 63,612 km2)
+  2. Area calculations (La Guajira total ~ 20,848 km2)
   3. Cross-validation of SAR water detection against JRC GSW
   4. ML model metrics are within reasonable ranges
   5. Municipal statistics sum to department totals
@@ -51,7 +51,7 @@ from utils import (
     load_guajira_boundary, load_municipalities, load_subregions,
     compute_area_km2, validate_guajira_area,
     OUTPUTS_DIR, TABLES_DIR, FIGURES_DIR, OVERLEAF_FIGURES, OVERLEAF_TABLES,
-    ANTIOQUIA_AREA_KM2, ANTIOQUIA_AREA_TOLERANCE,
+    GUAJIRA_AREA_KM2, GUAJIRA_AREA_TOLERANCE,
     CRS_WGS84, CRS_COLOMBIA,
 )
 
@@ -236,12 +236,12 @@ def check_outputs() -> List[QCResult]:
 def validate_areas() -> List[QCResult]:
     """
     Validate that area calculations for La Guajira boundaries are
-    consistent with the expected 63,612 km2 (DANE official area).
+    consistent with the expected 20,848 km2 (DANE official area).
 
     Tests:
     - GADM department boundary area
-    - Sum of 125 municipality areas
-    - Sum of 9 subregion areas
+    - Sum of 15 municipality areas
+    - Sum of 3 subregion areas
     - Individual municipality areas are positive and reasonable
 
     Returns
@@ -256,8 +256,8 @@ def validate_areas() -> List[QCResult]:
         try:
             boundary = load_guajira_boundary(source)
             area_km2 = compute_area_km2(boundary)
-            within_tol = abs(area_km2 - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 <= ANTIOQUIA_AREA_TOLERANCE
-            diff_pct = (area_km2 - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 * 100
+            within_tol = abs(area_km2 - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 <= GUAJIRA_AREA_TOLERANCE
+            diff_pct = (area_km2 - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 * 100
 
             r = QCResult(
                 check_name=f"area_department_{source}",
@@ -265,10 +265,10 @@ def validate_areas() -> List[QCResult]:
                 passed=within_tol,
                 message=(
                     f"La Guajira area ({source}): {area_km2:,.1f} km2 "
-                    f"(expected ~{ANTIOQUIA_AREA_KM2:,.0f} km2, "
+                    f"(expected ~{GUAJIRA_AREA_KM2:,.0f} km2, "
                     f"diff = {diff_pct:+.2f}%)"
                 ),
-                details=f"Tolerance: {ANTIOQUIA_AREA_TOLERANCE*100:.0f}%",
+                details=f"Tolerance: {GUAJIRA_AREA_TOLERANCE*100:.0f}%",
                 severity="ERROR" if not within_tol else "INFO",
             )
             results.append(r)
@@ -288,15 +288,15 @@ def validate_areas() -> List[QCResult]:
     try:
         municipalities = load_municipalities("gadm")
         mun_total = compute_area_km2(municipalities)
-        within_tol = abs(mun_total - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 <= ANTIOQUIA_AREA_TOLERANCE
-        diff_pct = (mun_total - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 * 100
+        within_tol = abs(mun_total - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 <= GUAJIRA_AREA_TOLERANCE
+        diff_pct = (mun_total - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 * 100
 
         r = QCResult(
             check_name="area_municipalities_sum",
             category="area_validation",
             passed=within_tol,
             message=(
-                f"Sum of 125 municipalities: {mun_total:,.1f} km2 "
+                f"Sum of 15 municipalities: {mun_total:,.1f} km2 "
                 f"(diff = {diff_pct:+.2f}%)"
             ),
             severity="ERROR" if not within_tol else "INFO",
@@ -344,15 +344,15 @@ def validate_areas() -> List[QCResult]:
     try:
         subregions = load_subregions()
         sub_total = compute_area_km2(subregions)
-        within_tol = abs(sub_total - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 <= ANTIOQUIA_AREA_TOLERANCE
-        diff_pct = (sub_total - ANTIOQUIA_AREA_KM2) / ANTIOQUIA_AREA_KM2 * 100
+        within_tol = abs(sub_total - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 <= GUAJIRA_AREA_TOLERANCE
+        diff_pct = (sub_total - GUAJIRA_AREA_KM2) / GUAJIRA_AREA_KM2 * 100
 
         r = QCResult(
             check_name="area_subregions_sum",
             category="area_validation",
             passed=within_tol,
             message=(
-                f"Sum of 9 subregions: {sub_total:,.1f} km2 "
+                f"Sum of 3 subregions: {sub_total:,.1f} km2 "
                 f"(diff = {diff_pct:+.2f}%)"
             ),
             severity="WARNING" if not within_tol else "INFO",
@@ -618,7 +618,7 @@ def verify_municipal_stats() -> List[QCResult]:
     Verify that municipal-level statistics are internally consistent:
     - Sum of municipal populations equals department total (approximately)
     - Sum of municipal areas equals department area
-    - All 125 municipalities are accounted for
+    - All 15 municipalities are accounted for
     - Risk scores are within [0, 1]
     - No duplicated municipalities
 
@@ -633,7 +633,7 @@ def verify_municipal_stats() -> List[QCResult]:
     try:
         municipalities = load_municipalities("gadm")
         n_mun = len(municipalities)
-        expected = 125
+        expected = 15
         within_range = abs(n_mun - expected) <= 5  # Allow small tolerance
         r = QCResult(
             check_name="municipal_count",
@@ -679,9 +679,9 @@ def verify_municipal_stats() -> List[QCResult]:
         r = QCResult(
             check_name="subregion_count",
             category="municipal_stats",
-            passed=(n_sub == 9),
-            message=f"Subregion count: {n_sub} (expected 9)",
-            severity="ERROR" if n_sub != 9 else "INFO",
+            passed=(n_sub == 3),
+            message=f"Subregion count: {n_sub} (expected 3)",
+            severity="ERROR" if n_sub != 3 else "INFO",
         )
         results.append(r)
         _add_result(r)
@@ -866,7 +866,7 @@ def generate_qc_report() -> pathlib.Path:
 def main() -> None:
     """Run all quality control checks and generate the report."""
     logger.info("=" * 70)
-    logger.info("QUALITY CONTROL - ANTIOQUIA FLOOD RISK ASSESSMENT")
+    logger.info("QUALITY CONTROL - LA GUAJIRA FLOOD RISK ASSESSMENT")
     logger.info("=" * 70)
 
     ensure_dirs()

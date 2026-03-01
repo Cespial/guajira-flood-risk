@@ -153,16 +153,16 @@ def add_scalebar_wgs84(ax, lat_center=7.0, length_km=50):
 def fig02_sar_water_detection():
     """
     Download real Sentinel-1 SAR data for a known flood event.
-    Bajo Cauca region (Caucasia-Nechí-El Bagre) — most flood-prone area.
+    Rancheria River corridor (Riohacha-Barrancas-Fonseca) — most flood-prone area.
     Pre-flood: Jul-Aug 2024 (dry), During-flood: Oct-Nov 2024 (wet).
     """
     print("Generating Figure 2: SAR water detection (REAL DATA)...")
     set_publication_style()
 
-    # Focus on Bajo Cauca / Nechí / lower Cauca River — most flood-prone
+    # Focus on Rancheria River / Baja Guajira — most flood-prone
     # Tighter region for more detail
-    flood_region = ee.Geometry.Rectangle([-75.35, 7.55, -74.65, 8.35])
-    flood_bbox = [-75.35, 7.55, -74.65, 8.35]
+    flood_region = ee.Geometry.Rectangle([-73.40, 10.80, -72.20, 11.80])
+    flood_bbox = [-73.40, 10.80, -72.20, 11.80]
 
     s1 = (
         ee.ImageCollection('COPERNICUS/S1_GRD')
@@ -219,7 +219,7 @@ def fig02_sar_water_detection():
                    frameon=True, framealpha=0.9)
 
     fig.suptitle(
-        "Sentinel-1 SAR Flood Detection — Bajo Cauca, La Guajira",
+        "Sentinel-1 SAR Flood Detection — Baja Guajira, La Guajira",
         fontsize=10, fontweight="bold", y=1.02,
     )
     fig.tight_layout()

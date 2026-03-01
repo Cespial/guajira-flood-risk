@@ -1,5 +1,5 @@
 """
-Shared utility functions for the Antioquia Flood Risk Assessment project.
+Shared utility functions for the La Guajira Flood Risk Assessment project.
 
 Provides common I/O helpers, boundary loaders, logging setup, and
 reusable geospatial processing routines used across all analysis scripts.
@@ -31,9 +31,9 @@ OVERLEAF_FIGURES = OVERLEAF_DIR / "figures"
 OVERLEAF_TABLES = OVERLEAF_DIR / "tables"
 LOGS_DIR = PROJECT_ROOT / "logs"
 
-# Expected Antioquia area in km2 (DANE official)
-ANTIOQUIA_AREA_KM2 = 63_612.0
-ANTIOQUIA_AREA_TOLERANCE = 0.05  # 5% tolerance for area validation
+# Expected La Guajira area in km2 (DANE official)
+GUAJIRA_AREA_KM2 = 20_848.0
+GUAJIRA_AREA_TOLERANCE = 0.05  # 5% tolerance for area validation
 
 # EPSG codes
 CRS_WGS84 = "EPSG:4326"
@@ -97,9 +97,9 @@ def setup_logging(
 # Boundary loaders
 # ---------------------------------------------------------------------------
 
-def load_antioquia_boundary(source: str = "gadm") -> gpd.GeoDataFrame:
+def load_guajira_boundary(source: str = "gadm") -> gpd.GeoDataFrame:
     """
-    Load the Antioquia department boundary polygon.
+    Load the La Guajira department boundary polygon.
 
     Parameters
     ----------
@@ -111,23 +111,26 @@ def load_antioquia_boundary(source: str = "gadm") -> gpd.GeoDataFrame:
     gpd.GeoDataFrame with a single polygon row.
     """
     paths = {
-        "gadm": BOUNDARIES_DIR / "antioquia_department_boundary_GADM41.geojson",
-        "geoboundaries": BOUNDARIES_DIR / "antioquia_department_boundary_geoBoundaries.geojson",
-        "naturalearth": BOUNDARIES_DIR / "antioquia_department_naturalearth.geojson",
+        "gadm": BOUNDARIES_DIR / "guajira_department_boundary_GADM41.geojson",
+        "geoboundaries": BOUNDARIES_DIR / "guajira_department_boundary_geoBoundaries.geojson",
+        "naturalearth": BOUNDARIES_DIR / "guajira_department_naturalearth.geojson",
     }
     path = paths.get(source)
     if path is None or not path.exists():
         raise FileNotFoundError(
-            f"Antioquia boundary not found for source='{source}'. "
+            f"La Guajira boundary not found for source='{source}'. "
             f"Expected: {path}. Run scripts/download_boundaries.py first."
         )
     gdf = gpd.read_file(path)
     return gdf
 
+# Backwards compatibility alias
+load_antioquia_boundary = load_guajira_boundary
+
 
 def load_municipalities(source: str = "gadm") -> gpd.GeoDataFrame:
     """
-    Load Antioquia municipality polygons (125 municipalities).
+    Load La Guajira municipality polygons (15 municipalities).
 
     Parameters
     ----------
@@ -139,8 +142,8 @@ def load_municipalities(source: str = "gadm") -> gpd.GeoDataFrame:
     gpd.GeoDataFrame
     """
     paths = {
-        "gadm": BOUNDARIES_DIR / "antioquia_municipalities_125_GADM41.geojson",
-        "geoboundaries": BOUNDARIES_DIR / "antioquia_municipalities_geoBoundaries_simplified.geojson",
+        "gadm": BOUNDARIES_DIR / "guajira_municipalities_15_GADM41.geojson",
+        "geoboundaries": BOUNDARIES_DIR / "guajira_municipalities_geoBoundaries_simplified.geojson",
     }
     path = paths.get(source)
     if path is None or not path.exists():
@@ -152,8 +155,8 @@ def load_municipalities(source: str = "gadm") -> gpd.GeoDataFrame:
 
 
 def load_subregions() -> gpd.GeoDataFrame:
-    """Load the 9 official subregions of Antioquia."""
-    path = BOUNDARIES_DIR / "antioquia_9_subregions.geojson"
+    """Load the 3 official subregions of La Guajira."""
+    path = BOUNDARIES_DIR / "guajira_3_subregions.geojson"
     if not path.exists():
         raise FileNotFoundError(f"Subregions file not found: {path}")
     return gpd.read_file(path)
@@ -161,14 +164,14 @@ def load_subregions() -> gpd.GeoDataFrame:
 
 def load_river_basins(level: int = 5) -> gpd.GeoDataFrame:
     """
-    Load HydroSHEDS river basins clipped to Antioquia.
+    Load HydroSHEDS river basins clipped to La Guajira.
 
     Parameters
     ----------
     level : int
         HydroBASINS level (5 or 7).
     """
-    path = BOUNDARIES_DIR / f"antioquia_river_basins_HydroSHEDS_L{level}.geojson"
+    path = BOUNDARIES_DIR / f"guajira_river_basins_HydroSHEDS_L{level}.geojson"
     if not path.exists():
         raise FileNotFoundError(f"River basins file not found: {path}")
     return gpd.read_file(path)
@@ -214,13 +217,13 @@ def compute_area_km2(gdf: gpd.GeoDataFrame) -> float:
     return projected.geometry.area.sum() / 1e6
 
 
-def validate_antioquia_area(gdf: gpd.GeoDataFrame, tolerance: float = 0.05) -> bool:
+def validate_guajira_area(gdf: gpd.GeoDataFrame, tolerance: float = 0.05) -> bool:
     """
     Check whether the total area of gdf is close to the expected
-    Antioquia area (63,612 km2) within the given fractional tolerance.
+    La Guajira area (20,848 km2) within the given fractional tolerance.
     """
     area = compute_area_km2(gdf)
-    expected = ANTIOQUIA_AREA_KM2
+    expected = GUAJIRA_AREA_KM2
     diff_frac = abs(area - expected) / expected
     return diff_frac <= tolerance
 

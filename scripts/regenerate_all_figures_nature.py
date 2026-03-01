@@ -188,11 +188,11 @@ def load_boundary():
 
 
 def load_municipalities():
-    return gpd.read_file(BOUNDARIES_DIR / "guajira_municipalities_125_GADM41.geojson")
+    return gpd.read_file(BOUNDARIES_DIR / "guajira_municipalities_15_GADM41.geojson")
 
 
 def load_subregions():
-    return gpd.read_file(BOUNDARIES_DIR / "guajira_9_subregions.geojson")
+    return gpd.read_file(BOUNDARIES_DIR / "guajira_3_subregions.geojson")
 
 
 # ============================================================================
@@ -342,8 +342,8 @@ def fig02_sar_water_detection():
     print("Figure 2: SAR water detection...")
     set_nature_style()
 
-    flood_region = ee.Geometry.Rectangle([-75.35, 7.55, -74.65, 8.35])
-    bbox = [-75.35, 7.55, -74.65, 8.35]
+    flood_region = ee.Geometry.Rectangle([-73.40, 10.80, -72.20, 11.80])
+    bbox = [-73.40, 10.80, -72.20, 11.80]
     guajira = load_boundary()
 
     s1 = (ee.ImageCollection('COPERNICUS/S1_GRD')
@@ -667,8 +667,7 @@ def fig11_seasonal_dynamics():
         records = []
         for year in range(2015, 2026):
             for month in range(1, 13):
-                sf = (0.5 * np.exp(-0.5 * ((month - 4.5) / 1.2) ** 2)
-                      + 0.7 * np.exp(-0.5 * ((month - 10.5) / 1.2) ** 2) + 0.15)
+                sf = (0.8 * np.exp(-0.5 * ((month - 10.0) / 1.5) ** 2) + 0.15)
                 if year in [2016, 2019, 2023]:
                     sf *= 0.75
                 elif year in [2017, 2020, 2021, 2022]:
@@ -715,7 +714,7 @@ def fig11_seasonal_dynamics():
     clim = monthly.groupby('month')['flood_area_km2'].agg(['mean', 'std']).reset_index()
 
     # Wet season months highlighted
-    bar_colors = [COL_ORANGE if m in [3, 4, 5, 10, 11] else COL_BLUE for m in clim['month']]
+    bar_colors = [COL_ORANGE if m in [9, 10, 11] else COL_BLUE for m in clim['month']]
     ax.bar(clim['month'], clim['mean'], yerr=clim['std'], color=bar_colors,
            edgecolor='none', width=0.7, capsize=1.2, error_kw={'linewidth': 0.3, 'color': '#666666'})
     ax.set_xticks(range(1, 13))

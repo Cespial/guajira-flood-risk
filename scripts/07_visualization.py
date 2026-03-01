@@ -11,7 +11,7 @@ Generates 12 figures at 600 DPI (PDF + PNG) following journal formatting:
   - Scale bars, north arrows, and proper CRS on all maps
 
 Figures:
-  Fig 1  - Study area map (La Guajira, 9 subregions, rivers, elevation)
+  Fig 1  - Study area map (La Guajira, 3 subregions, rivers, elevation)
   Fig 2  - Sentinel-1 SAR water detection example (before/after flood)
   Fig 3  - JRC Global Surface Water occurrence map
   Fig 4  - Flood frequency map (multi-temporal SAR composite)
@@ -243,7 +243,7 @@ def _load_or_synthesize_df(
 
 def fig01_study_area() -> None:
     """
-    Study area map showing La Guajira department with 9 subregions,
+    Study area map showing La Guajira department with 3 subregions,
     river basins, and elevation context.
     """
     logger.info("Generating Figure 1: Study area map...")
@@ -918,7 +918,7 @@ def fig10_population_exposure() -> None:
 def fig11_seasonal_dynamics() -> None:
     """
     Monthly water extent time series showing seasonal flood dynamics
-    in La Guajira (bimodal pattern: MAM and SON wet seasons).
+    in La Guajira (unimodal pattern: Sep-Nov wet season).
     """
     logger.info("Generating Figure 11: Seasonal flood dynamics...")
     set_publication_style()
@@ -933,10 +933,9 @@ def fig11_seasonal_dynamics() -> None:
         records = []
         for year in range(2015, 2026):
             for month in range(1, 13):
-                # Bimodal pattern: peaks in April-May and October-November
+                # Unimodal pattern: single wet season peak in Oct-Nov
                 seasonal_factor = (
-                    0.5 * np.exp(-0.5 * ((month - 4.5) / 1.2) ** 2)
-                    + 0.7 * np.exp(-0.5 * ((month - 10.5) / 1.2) ** 2)
+                    0.8 * np.exp(-0.5 * ((month - 10.0) / 1.5) ** 2)
                     + 0.15
                 )
                 area = seasonal_factor * 300 + np.random.normal(0, 30)
@@ -965,14 +964,13 @@ def fig11_seasonal_dynamics() -> None:
     ax.set_ylabel("Flood extent (km$^2$)")
     ax.set_title("(a) Monthly flood extent time series (2015--2025)", fontsize=9)
 
-    # Shade wet seasons
+    # Shade wet season (unimodal: Sep-Nov only)
     for year in range(2015, 2026):
-        for m_start, m_end, color in [(3, 5, "#66c2a5"), (9, 11, "#fc8d59")]:
-            ax.axvspan(
-                pd.Timestamp(year, m_start, 1),
-                pd.Timestamp(year, m_end, 28),
-                alpha=0.08, color=color,
-            )
+        ax.axvspan(
+            pd.Timestamp(year, 9, 1),
+            pd.Timestamp(year, 11, 28),
+            alpha=0.08, color="#fc8d59",
+        )
 
     # (b) Climatological monthly mean
     ax = axes[1]
@@ -986,12 +984,8 @@ def fig11_seasonal_dynamics() -> None:
     ax.set_ylabel("Mean flood extent (km$^2$)")
     ax.set_title("(b) Climatological mean monthly flood extent", fontsize=9)
 
-    # Mark seasons
-    for m_start, m_end, label, color in [
-        (3, 5, "MAM (Wet 1)", "#66c2a5"),
-        (9, 11, "SON (Wet 2)", "#fc8d59"),
-    ]:
-        ax.axvspan(m_start - 0.4, m_end + 0.4, alpha=0.15, color=color, label=label)
+    # Mark wet season (unimodal: Sep-Nov)
+    ax.axvspan(9 - 0.4, 11 + 0.4, alpha=0.15, color="#fc8d59", label="SON (Wet season)")
     ax.legend(fontsize=7, loc="upper left")
 
     fig.tight_layout()
@@ -1103,7 +1097,7 @@ def fig12_climate_flood_correlation() -> None:
 def main() -> None:
     """Generate all 12 publication-quality figures."""
     logger.info("=" * 70)
-    logger.info("PUBLICATION FIGURE GENERATION - ANTIOQUIA FLOOD RISK ASSESSMENT")
+    logger.info("PUBLICATION FIGURE GENERATION - LA GUAJIRA FLOOD RISK ASSESSMENT")
     logger.info("=" * 70)
 
     ensure_dirs()

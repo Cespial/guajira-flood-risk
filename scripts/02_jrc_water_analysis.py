@@ -168,7 +168,7 @@ def seasonal_dynamics(region: ee.Geometry) -> Dict[str, ee.Image]:
     """
     Compute seasonal water extent differences for La Guajira.
 
-    Uses Colombia's bimodal precipitation pattern defined in
+    Uses La Guajira's unimodal precipitation pattern defined in
     ``gee_config.SEASONS`` to compare wet-season and dry-season water
     extents from JRC monthly water history.
 
@@ -180,8 +180,8 @@ def seasonal_dynamics(region: ee.Geometry) -> Dict[str, ee.Image]:
     Returns
     -------
     dict[str, ee.Image]
-        Keys: season abbreviations (``'DJF'``, ``'MAM'``, ``'JJA'``,
-        ``'SON'``) mapped to mean water frequency images, plus
+        Keys: season names (``'Dry'``, ``'Transition'``, ``'Veranillo'``,
+        ``'Wet'``) mapped to mean water frequency images, plus
         ``'wet_dry_diff'`` (wet - dry difference).
     """
     monthly = (
@@ -218,11 +218,9 @@ def seasonal_dynamics(region: ee.Geometry) -> Dict[str, ee.Image]:
             season_code, season_info["label"], months,
         )
 
-    # Wet vs dry difference
-    # Wet seasons: MAM (first rains) + SON (peak floods)
-    # Dry seasons: DJF + JJA
-    wet_mean = seasonal_images["MAM"].add(seasonal_images["SON"]).divide(2)
-    dry_mean = seasonal_images["DJF"].add(seasonal_images["JJA"]).divide(2)
+    # Wet vs dry difference (unimodal: single wet season Sep-Nov)
+    wet_mean = seasonal_images["Wet"]
+    dry_mean = seasonal_images["Dry"]
     diff = wet_mean.subtract(dry_mean).rename("wet_dry_diff").clip(region)
     seasonal_images["wet_dry_diff"] = diff
 
@@ -440,10 +438,10 @@ def run_jrc_analysis(export: bool = True) -> list:
     if export:
         # Stack seasonal bands into one image for export
         seasonal_stack = (
-            seasonal["DJF"]
-            .addBands(seasonal["MAM"])
-            .addBands(seasonal["JJA"])
-            .addBands(seasonal["SON"])
+            seasonal["Dry"]
+            .addBands(seasonal["Transition"])
+            .addBands(seasonal["Veranillo"])
+            .addBands(seasonal["Wet"])
             .addBands(seasonal["wet_dry_diff"])
         )
         task = export_to_drive(

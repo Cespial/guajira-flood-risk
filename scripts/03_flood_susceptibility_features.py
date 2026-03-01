@@ -59,7 +59,7 @@ from scripts.utils import (  # noqa: E402
 log = setup_logging("03_features")
 
 # Number of training samples per class (flood / non-flood)
-SAMPLES_PER_CLASS = 5000
+SAMPLES_PER_CLASS = 2500
 SAMPLE_SCALE = 30  # meters
 
 
