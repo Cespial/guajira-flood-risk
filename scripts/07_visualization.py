@@ -985,7 +985,7 @@ def fig11_seasonal_dynamics() -> None:
     ax.set_title("(b) Climatological mean monthly flood extent", fontsize=9)
 
     # Mark wet season (unimodal: Sep-Nov)
-    ax.axvspan(9 - 0.4, 11 + 0.4, alpha=0.15, color="#fc8d59", label="SON (Wet season)")
+    ax.axvspan(9 - 0.4, 11 + 0.4, alpha=0.15, color="#fc8d59", label="Wet season (Sep-Nov)")
     ax.legend(fontsize=7, loc="upper left")
 
     fig.tight_layout()

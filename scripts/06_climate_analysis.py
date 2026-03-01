@@ -107,14 +107,15 @@ def compute_precipitation_trends() -> pd.DataFrame:
     """
     Compute annual and seasonal precipitation trends from CHIRPS daily data.
 
-    For each year (2015-2025) and each season (DJF, MAM, JJA, SON), computes
-    the spatially averaged total precipitation over La Guajira.  Then applies
-    the Mann-Kendall trend test to the annual and seasonal time series.
+    For each year (2015-2025) and each season (Dry, Transition, Veranillo,
+    Wet), computes the spatially averaged total precipitation over La Guajira.
+    Then applies the Mann-Kendall trend test to the annual and seasonal
+    time series.
 
     Returns
     -------
     pd.DataFrame
-        Columns: year, annual_precip_mm, DJF_mm, MAM_mm, JJA_mm, SON_mm
+        Columns: year, annual_precip_mm, Dry_mm, Transition_mm, Veranillo_mm, Wet_mm
     """
     logger.info("Computing CHIRPS precipitation trends (2015-2025)...")
     aoi = get_guajira_geometry()
@@ -138,18 +139,18 @@ def compute_precipitation_trends() -> pd.DataFrame:
         ).getInfo()
         row["annual_precip_mm"] = annual_val.get("precipitation", np.nan)
 
-        # Seasonal totals
+        # Seasonal totals (La Guajira unimodal: Dry, Transition, Veranillo, Wet)
         for season_key, season_info in SEASONS.items():
             months = season_info["months"]
-            # Handle DJF crossing year boundary
-            if season_key == "DJF":
+            # Handle Dry season crossing year boundary (Dec, Jan, Feb, Mar)
+            if season_key == "Dry":
                 if year == YEARS[0]:
                     # No December from previous year available
                     start = f"{year}-01-01"
-                    end = f"{year}-02-28"
+                    end = f"{year}-03-31"
                 else:
                     start = f"{year - 1}-12-01"
-                    end = f"{year}-02-28"
+                    end = f"{year}-03-31"
             else:
                 start = f"{year}-{months[0]:02d}-01"
                 end_month = months[-1]
@@ -183,7 +184,7 @@ def compute_precipitation_trends() -> pd.DataFrame:
         import pymannkendall as mk
 
         mk_results = {}
-        for col in ["annual_precip_mm", "DJF_mm", "MAM_mm", "JJA_mm", "SON_mm"]:
+        for col in ["annual_precip_mm", "Dry_mm", "Transition_mm", "Veranillo_mm", "Wet_mm"]:
             series = df[col].dropna().values
             if len(series) >= 4:
                 result = mk.original_test(series)
@@ -743,11 +744,12 @@ def _plot_precipitation_trends(precip_df: pd.DataFrame) -> None:
                 label=f"Trend: {slope:+.1f} mm/yr")
         ax.legend()
 
-    # Seasonal stacked
+    # Seasonal stacked (La Guajira unimodal seasons)
     ax = axes[1]
     bottom = np.zeros(len(precip_df))
     colors = ["#fee08b", "#66c2a5", "#fc8d59", "#8da0cb"]
-    for i, season in enumerate(["DJF_mm", "MAM_mm", "JJA_mm", "SON_mm"]):
+    season_cols = ["Dry_mm", "Transition_mm", "Veranillo_mm", "Wet_mm"]
+    for i, season in enumerate(season_cols):
         vals = precip_df[season].fillna(0).values
         ax.bar(precip_df["year"], vals, bottom=bottom, color=colors[i],
                width=0.7, label=season.replace("_mm", ""))

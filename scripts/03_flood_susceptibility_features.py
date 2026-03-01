@@ -538,8 +538,12 @@ def _create_flood_label(region: ee.Geometry) -> ee.Image:
     """
     Create a binary flood label image for training data generation.
 
-    Flood pixels (label = 1): JRC occurrence >= 25 % **or** HAND < 5 m
-    Non-flood pixels (label = 0): JRC occurrence < 5 % **and** HAND >= 30 m
+    Flood pixels (label = 1): JRC occurrence >= threshold **or** HAND < threshold
+    Non-flood pixels (label = 0): JRC occurrence < threshold **and** HAND >= threshold
+
+    Thresholds are defined in ``gee_config.TRAINING_LABELS`` and have been
+    adjusted for arid La Guajira (lower JRC occurrence thresholds due to
+    fewer flood events).
 
     Pixels not meeting either criterion are masked out to create clear
     separation between classes.
@@ -559,11 +563,19 @@ def _create_flood_label(region: ee.Geometry) -> ee.Image:
     dem = get_dem()
     hand = compute_hand(dem, region)
 
+    # Use thresholds from gee_config (adjusted for arid region)
+    pos = cfg.TRAINING_LABELS["flood_positive"]
+    neg = cfg.TRAINING_LABELS["flood_negative"]
+
     # Flood class: historically wet areas OR very low HAND
-    flood = jrc_occ.gte(25).Or(hand.lt(5)).rename("label")
+    flood = jrc_occ.gte(pos["jrc_occurrence_min"]).Or(
+        hand.lt(pos["hand_max"])
+    ).rename("label")
 
     # Non-flood class: dry areas AND high HAND
-    non_flood = jrc_occ.lt(5).And(hand.gte(30)).rename("label")
+    non_flood = jrc_occ.lt(neg["jrc_occurrence_max"]).And(
+        hand.gte(neg["hand_min"])
+    ).rename("label")
 
     # Combine: 1 = flood, 0 = non-flood; mask ambiguous pixels
     label = ee.Image(0).rename("label")
