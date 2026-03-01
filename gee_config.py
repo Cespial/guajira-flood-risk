@@ -306,8 +306,8 @@ CV_PARAMS = {
 SPATIAL_CV_FOLDS = {
     0: ['Uribia', 'Manaure'],  # Alta Guajira
     1: ['Riohacha', 'Maicao', 'Dibulla'],  # Media Guajira
-    2: ['Albania', 'Barrancas', 'Hatonuevo', 'Fonseca'],  # Baja Guajira - North
-    3: ['Distraccion', 'El Molino', 'San Juan del Cesar'],  # Baja Guajira - Central
+    2: ['Albania', 'Barrancas', 'Hato Nuevo', 'Fonseca'],  # Baja Guajira - North
+    3: ['Distraccion', 'El Molino', 'San Juan Del Cesar'],  # Baja Guajira - Central
     4: ['La Jagua del Pilar', 'Urumita', 'Villanueva'],  # Baja Guajira - South
 }
 

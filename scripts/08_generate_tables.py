@@ -423,7 +423,7 @@ def generate_table5_municipal_risk() -> pd.DataFrame:
             name_col = "NAME_2" if "NAME_2" in muns.columns else muns.columns[0]
             all_names = muns[name_col].tolist()
         except Exception:
-            all_names = [f"Municipality_{i}" for i in range(1, 16)]
+            all_names = [f"Municipality_{i}" for i in range(1, 12)]  # 11 in GAUL
 
         np.random.seed(42)
         n = min(20, len(all_names))

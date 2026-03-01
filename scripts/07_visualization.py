@@ -497,10 +497,10 @@ def fig04_flood_frequency() -> None:
         shape=(600, 500), vmin=0, vmax=100,
     )
 
-    # Classify
+    # Classify — derive boundaries from config (ascending order)
     class_info = FLOOD_FREQUENCY_CLASSES
-    boundaries = [0, 1, 10, 25, 50, 75, 100]
-    colors = [v["color"] for v in class_info.values()]
+    boundaries = [0, 1, 5, 15, 50, 75, 100]  # matches config: rare/occasional/frequent/very_frequent/permanent
+    colors = [v["color"] for v in reversed(class_info.values())]  # config is high→low; reverse for ascending bins
     cmap = ListedColormap(colors)
     norm = BoundaryNorm(boundaries, cmap.N)
 
@@ -520,7 +520,7 @@ def fig04_flood_frequency() -> None:
 
     guajira.boundary.plot(ax=ax, color="black", linewidth=1.0)
 
-    # Legend
+    # Legend (descending: permanent first → rare last)
     legend_patches = [
         mpatches.Patch(color=v["color"], label=v["label"])
         for v in class_info.values()
@@ -854,8 +854,9 @@ def fig10_population_exposure() -> None:
             exposure["population_exposed"] / exposure["population_total"] * 100
         )
 
-    # Top 20 by exposed population
-    top20 = exposure.nlargest(20, "population_exposed")
+    # Top municipalities by exposed population
+    n_top = min(20, len(exposure))
+    top20 = exposure.nlargest(n_top, "population_exposed")
 
     fig, axes = plt.subplots(
         1, 2, figsize=figsize_double(0.55),
@@ -875,7 +876,7 @@ def fig10_population_exposure() -> None:
     ax_bar.set_yticks(y_pos)
     ax_bar.set_yticklabels(top20["municipality"].values, fontsize=7)
     ax_bar.set_xlabel("Population exposed to flood risk")
-    ax_bar.set_title("(a) Top 20 municipalities", fontsize=9)
+    ax_bar.set_title(f"(a) Top {n_top} municipalities", fontsize=9)
     ax_bar.invert_yaxis()
 
     # Small choropleth map
